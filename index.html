@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$SoDead - Terminal Memecoin</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .terminal {
+            background-color: #0a0a0a;
+            border: 2px solid #444444;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+            overflow: auto;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .prompt {
+            color: #aaaaaa;
+            font-weight: bold;
+        }
+        .command {
+            color: #ffffff;
+        }
+        .section {
+            margin-bottom: 30px;
+            border-bottom: 1px dashed #444444;
+            padding-bottom: 20px;
+        }
+        .section-title {
+            color: #bbbbbb;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .button {
+            display: inline-block;
+            background-color: #1a1a1a;
+            color: #cccccc;
+            border: 1px solid #444444;
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            background-color: #333333;
+            color: #ffffff;
+            border-color: #666666;
+        }
+        .logo {
+            font-size: 12px;
+            white-space: pre;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .stat-box {
+            border: 1px solid #444444;
+            background-color: #151515;
+            padding: 10px;
+            margin: 5px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #151515;
+            border-radius: 3px;
+            margin: 10px 0;
+            height: 20px;
+            position: relative;
+            border: 1px solid #444444;
+        }
+        .progress {
+            height: 100%;
+            background-color: #444444;
+            border-radius: 3px;
+            width: 75%;
+        }
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            line-height: 20px;
+            color: #ffffff;
+        }
+        .top-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .top-button {
+            display: inline-flex;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: #cccccc;
+            border: 1px solid #444444;
+            padding: 8px 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .top-button:hover {
+            background-color: #333333;
+            color: #ffffff;
+            border-color: #666666;
+        }
+        .top-button i {
+            margin-right: 8px;
+        }
+        .interactive-terminal {
+            background-color: #111111;
+            border: 1px solid #444444;
+            padding: 15px;
+            margin: 20px 0;
+            height: 200px;
+            overflow-y: auto;
+        }
+        .terminal-output {
+            margin-bottom: 10px;
+            color: #cccccc;
+        }
+        .terminal-input {
+            display: flex;
+            align-items: center;
+        }
+        .terminal-input-prompt {
+            color: #aaaaaa;
+            margin-right: 10px;
+        }
+        #command-input {
+            background-color: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            flex-grow: 1;
+            caret-color: #aaaaaa;
+            outline: none;
+        }
+        .matrix-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .game-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        #game-container {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #444444;
+            background-color: #0a0a0a;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .player {
+            width: 20px;
+            height: 20px;
+            background-color: #666666;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .obstacle {
+            width: 20px;
+            height: 20px;
+            background-color: #555555;
+            position: absolute;
+            top: -20px;
+        }
+        .coin {
+            width: 15px;
+            height: 15px;
+            background-color: #777777;
+            border-radius: 50%;
+            position: absolute;
+            top: -15px;
+        }
+        .highlight {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        h3 {
+            color: #bbbbbb;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas" class="matrix-effect"></canvas>
+    <div class="terminal">
+        <div class="header">
+            <div class="logo">
+███████╗ ██████╗ ██████╗ ███████╗ █████╗ ██████╗ 
+██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗
+███████╗██║   ██║██║  ██║█████╗  ███████║██║  ██║
+╚════██║██║   ██║██║  ██║██╔══╝  ██╔══██║██║  ██║
+███████║╚██████╔╝██████╔╝███████╗██║  ██║██████╔╝
+╚══════╝ ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝ 
+            </div>
+            <p>$SoDead - The Memecoin That's Ironically Alive</p>
+            <p class="prompt">root@sodead:~# <span class="command">./resurrect_token.sh</span> <span class="blink">█</span></p>
+        </div>
+
+        <div class="top-buttons">
+            <a href="https://x.com/SoDead_Coin" target="_blank" class="top-button">
+                <i></i> Twitter
+            </a>
+            <a href="https://t.me/SoDeadCoin" target="_blank" class="top-button">
+                <i></i> Telegram
+            </a>
+            <a href="https://pump.fun/profile/6dXCwf5UhjSXNR22GiLxxAoWu5MyYVSfdJ54K5zPoSqg" class="top-button" id="buy-button">
+                <i></i> Buy $SoDead
+            </a>
+        </div>
+
+        <div class="menu">
+            <a href="#" class="button">home.sh</a>
+            <a href="#" class="button">roadmap.sh</a>
+            <a href="#" class="button">features.sh</a>
+            <a href="#" class="button">tokenomics.sh</a>
+            <a href="#" class="button">community.sh</a>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $odead welcome.txt</h2>
+            <p>Welcome to $SoDead - The memecoin that's so dead it's actually alive! In a sea of dying tokens, we're proudly embracing our mortality and rising from the ashes. Join our undead army as we shuffle towards the moon!</p>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>Market Cap</h3>
+                    <p>$<span id="market-cap" class="highlight">4,000</span></p>
+                </div>
+                <div class="stat-box">
+                    <h3>Holders</h3>
+                    <p><span id="holders-count" class="highlight">3</span></p>
+                </div>
+                <div class="stat-box">
+                    <h3>Current Price</h3>
+                    <p>$<span id="current-price" class="highlight">0.00000420</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $ ./interactive_terminal.sh</h2>
+            <p class="prompt">Try these commands: help, about, price, holders, buy, features</p>
+            
+            <div class="interactive-terminal" id="interactive-terminal">
+                <div class="terminal-output">Welcome to $SoDead Interactive Terminal. Type 'help' for available commands.</div>
+                <div class="terminal-input">
+                    <span class="terminal-input-prompt">root@sodead:~#</span>
+                    <input type="text" id="command-input" placeholder="Enter a command...">
+                </div>
+            </div>
+        </div>
+
+        <div class="section game-section">
+            <h2 class="section-title">~ $ ./play_game.sh</h2>
+            <p>Earn virtual $SoDead by playing our mini-game! Use LEFT/RIGHT arrow keys to move and collect coins while avoiding obstacles.</p>
+            <div id="game-container">
+                <div class="player" id="player"></div>
+            </div>
+            <p>Score: <span id="game-score" class="highlight">0</span> | Virtual $SoDead: <span id="game-tokens" class="highlight">0</span></p>
+            <button id="start-game" class="button">Start Game</button>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $ ./roadmap.sh --view</h2>
+            <p class="prompt">Displaying project roadmap...</p>
+            
+            <h3>Phase 1: Rise from the Grave [IN PROGRESS]</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 65%"></div>
+                <div class="progress-text">65%</div>
+            </div>
+            <p>- Token launch and initial liquidity</p>
+            <p>- Website and social media launch</p>
+            <p>- Community building (Telegram & Twitter)</p>
+            <p>- First 100 holders milestone</p>
+            
+            <h3>Phase 2: Zombie Horde Expansion [PENDING]</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 25%"></div>
+                <div class="progress-text">25%</div>
+            </div>
+            <p>- CoinGecko & CoinMarketCap listings</p>
+            <p>- Community growth initiatives</p>
+            <p>- First DEX listing</p>
+            <p>- Marketing campaigns</p>
+            
+            <h3>Phase 3: Total Undead Domination [PLANNED]</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 5%"></div>
+                <div class="progress-text">5%</div>
+            </div>
+            <p>- Major CEX listings</p>
+            <p>- $SoDead NFT collection</p>
+            <p>- Partnerships with other projects</p>
+            <p>- SoDead merchandise store</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $ ./features.sh --list</h2>
+            <p class="prompt">Executing command... Listing all features:</p>
+            
+            <p class="command highlight">1. Anti-Rug Technology</p>
+            <p>Liquidity locked for 666 days. Contract ownership renounced. Can't die if you're already dead!</p>
+            
+            <p class="command highlight">2. Zombie Staking</p>
+            <p>Stake your $SoDead tokens to earn passive "brainz" rewards. The longer you're buried, the more you earn.</p>
+            
+            <p class="command highlight">3. Meme Generator</p>
+            <p>Create and share custom $SoDead memes directly from our website. Best weekly meme earns token rewards.</p>
+            
+            <p class="command highlight">4. Death Certificate NFTs</p>
+            <p>Exclusive NFTs for early holders that grant special privileges in our ecosystem and voting rights.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $ ./tokenomics.sh</h2>
+            <p class="prompt">Initializing token distribution analysis...</p>
+            <p>Total Supply: <span class="highlight">666,000,000,000</span> $SoDead</p>
+            <p>- 40% Circulating Supply</p>
+            <p>- 25% Locked for Community Rewards</p>
+            <p>- 15% Development Fund (Vested)</p>
+            <p>- 10% Marketing</p>
+            <p>- 10% Burned at Launch</p>
+            
+            <p class="prompt">root@sodead:~# <span class="command">cat tax_info.txt</span></p>
+            <p>Buy Tax: <span class="highlight">4%</span></p>
+            <p>Sell Tax: <span class="highlight">6%</span></p>
+            <p>Tax Distribution:</p>
+            <p>- 2% Added to Liquidity</p>
+            <p>- 2% Redistributed to Holders</p>
+            <p>- 2% Marketing & Development (sell tax only)</p>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $ ./buy.sh --instructions</h2>
+            <p class="prompt">How to buy $SoDead:</p>
+            <p>1. <span class="command">setup --wallet=metamask</span> - Install and set up MetaMask</p>
+            <p>2. <span class="command">fund --network=ethereum --amount=0.1</span> - Add ETH to your wallet</p>
+            <p>3. <span class="command">connect --dex=uniswap</span> - Go to Uniswap and connect wallet</p>
+            <p>4. <span class="command">swap --from=ETH --to=SODEAD --slippage=12%</span> - Swap ETH for $SoDead</p>
+            <p>5. <span class="command">hodl --duration=forever</span> - Hold and wait for resurrection!</p>
+            
+            <p class="prompt">Contract address: <span class="command">0xDEAD42069...FEAD420</span></p>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="#" class="button">Buy on Uniswap</a>
+                <a href="#" class="button">View on Etherscan</a>
+                <a href="#" class="button">Add to MetaMask</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">~ $ ./community.sh</h2>
+            <p class="prompt">Connecting to community channels...</p>
+            <p>Join our undead army:</p>
+            <p><span class="command">ssh user@telegram.sodead.io</span> - Telegram Group</p>
+            <p><span class="command">git clone https://discord.sodead.io</span> - Discord Server</p>
+            <p><span class="command">curl -s https://twitter.sodead.io</span> - Twitter/X</p>
+            <p><span class="command">ping reddit.sodead.io</span> - Reddit Community</p>
+        </div>
+
+        <div class="section" style="border-bottom: none;">
+            <p class="prompt">root@sodead:~# <span class="command">echo "Join the undead revolution"</span></p>
+            <p class="prompt">root@sodead:~# <span class="blink">█</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const katakana = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const custom = '$SODEAD';
+        
+        const alphabet = katakana + latin + nums + custom;
+        
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        
+        const rainDrops = [];
+        
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+        
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#444444';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+        
+        setInterval(draw, 30);
+        
+        // Market cap and holders counter
+        let marketCap = 4000;
+        let holdersCount = 3;
+        let currentPrice = 0.00000420;
+        
+        function updateStats() {
+            // Randomly increase market cap between 10 and 100
+            const mcapIncrease = Math.random() * 100 + 10;
+            marketCap += mcapIncrease;
+            
+            // Randomly increase holders by 0 or 1 with higher probability of 0
+            if (Math.random() > 0.6) {
+                holdersCount += 1;
+            }
+            
+            // Update price based on market cap with some volatility
+            const priceChange = (Math.random() * 0.00000050) - 0.00000025;
+            currentPrice = Math.max(0.00000100, currentPrice + priceChange);
+            
+            // Update the display
+            document.getElementById('market-cap').textContent = marketCap.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            document.getElementById('holders-count').textContent = holdersCount;
+            document.getElementById('current-price').textContent = currentPrice.toFixed(8);
+        }
+        
+        // Update stats every second for faster updates
+        setInterval(updateStats, 300);
+        
+        // Interactive terminal
+        const terminalOutput = document.getElementById('interactive-terminal');
+        const commandInput = document.getElementById('command-input');
+        
+        function addTerminalOutput(text) {
+            const outputDiv = document.createElement('div');
+            outputDiv.className = 'terminal-output';
+            outputDiv.textContent = text;
+            terminalOutput.insertBefore(outputDiv, terminalOutput.lastElementChild);
+        }
+        
+        commandInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim().toLowerCase();
+                
+                // Add the command to output
+                addTerminalOutput(`root@sodead:~# ${command}`);
+                
+                // Process commands
+                switch(command) {
+                    case 'help':
+                        addTerminalOutput('Available commands: help, about, price, holders, marketcap, buy, features, roadmap, social');
+                        break;
+                    case 'about':
+                        addTerminalOutput('$SoDead is a memecoin that embraces its mortality. So dead it\'s alive!');
+                        break;
+                    case 'price':
+                        addTerminalOutput(`Current price: $${currentPrice.toFixed(8)}`);
+                        break;
+                    case 'holders':
+                        addTerminalOutput(`Current holders: ${holdersCount}`);
+                        break;
+                    case 'marketcap':
+                        addTerminalOutput(`Current Market Cap: $${marketCap.toFixed(2)}`);
+                        break;
+                    case 'buy':
+                        addTerminalOutput('To buy $SoDead, connect your wallet to Uniswap and swap ETH for $SoDead.');
+                        break;
+                    case 'features':
+                        addTerminalOutput('Features: Anti-Rug Technology, Zombie Staking, Meme Generator, Death Certificate NFTs');
+                        break;
+                    case 'roadmap':
+                        addTerminalOutput('Phase 1: Rise from the Grave (65%) | Phase 2: Zombie Horde Expansion (25%) | Phase 3: Total Undead Domination (5%)');
+                        break;
+                    case 'social':
+                        addTerminalOutput('Join us on Twitter: @SoDeadCoin | Telegram: t.me/SoDeadCoin');
+                        break;
+                    default:
+                        addTerminalOutput(`Command not found: ${command}. Type 'help' for available commands.`);
+                }
+                
+                // Clear input
+                commandInput.value = '';
+            }
+        });
+        
+        // Mini-game
+        let gameScore = 0;
+        let gameTokens = 0;
+        let gameRunning = false;
+        let playerPosition = 50;
+        const playerElement = document.getElementById('player');
+        const gameContainer = document.getElementById('game-container');
+        const scoreElement = document.getElementById('game-score');
+        const tokensElement = document.getElementById('game-tokens');
+        const startButton = document.getElementById('start-game');
+        
+        function updatePlayerPosition() {
+            playerElement.style.left = `${playerPosition}%`;
+        }
+        
+        function createObstacle() {
+            if (!gameRunning) return;
+            
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            
+            const position = Math.floor(Math.random() * 80) + 10;
+            obstacle.style.left = `${position}%`;
+            
+            gameContainer.appendChild(obstacle);
+            
+            let top = 0;
+            const moveDown = setInterval(() => {
+                if (!gameRunning) {
+                    clearInterval(moveDown);
+                    if (obstacle.parentNode) {
+                        obstacle.parentNode.removeChild(obstacle);
+                    }
+                    return;
+                }
+                
+                top += 2;
+                obstacle.style.top = `${top}px`;
+                
+                // Check collision
+                const playerRect = playerElement.getBoundingClientRect();
+                const obstacleRect = obstacle.getBoundingClientRect();
+                
+                if (
+                    playerRect.left < obstacleRect.right &&
+                    playerRect.right > obstacleRect.left &&
+                    playerRect.top < obstacleRect.bottom &&
+                    playerRect.bottom > obstacleRect.top
+                ) {
+                    // Collision detected
+                    gameRunning = false;
+                    alert(`Game Over! Score: ${gameScore}. You earned ${gameTokens} virtual $SoDead tokens!`);
+                    clearInterval(moveDown);
+                    obstacle.parentNode.removeChild(obstacle);
+                    return;
+                }
+                
+                // Remove when off screen
+                if (top > gameContainer.offsetHeight) {
+                    gameScore += 1;
+                    scoreElement.textContent = gameScore;
+                    
+                    clearInterval(moveDown);
+                    obstacle.parentNode.removeChild(obstacle);
+                }
+            }, 20);
+        }
+        
+        function createCoin() {
+            if (!gameRunning) return;
+            
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            
+            const position = Math.floor(Math.random() * 80) + 10;
+            coin.style.left = `${position}%`;
+            
+            gameContainer.appendChild(coin);
+            
+            let top = 0;
+            const moveDown = setInterval(() => {
+                if (!gameRunning) {
+                    clearInterval(moveDown);
+                    if (coin.parentNode) {
+                        coin.parentNode.removeChild(coin);
+                    }
+                    return;
+                }
+                
+                top += 3;
+                coin.style.top = `${top}px`;
+                
+                // Check collection
+                const playerRect = playerElement.getBoundingClientRect();
+                const coinRect = coin.getBoundingClientRect();
+                
+                if (
+                    playerRect.left < coinRect.right &&
+                    playerRect.right > coinRect.left &&
+                    playerRect.top < coinRect.bottom &&
+                    playerRect.bottom > coinRect.top
+                ) {
+                    // Coin collected
+                    gameTokens += 10;
+                    tokensElement.textContent = gameTokens;
+                    
+                    clearInterval(moveDown);
+                    coin.parentNode.removeChild(coin);
+                    return;
+                }
+                
+                // Remove when off screen
+                if (top > gameContainer.offsetHeight) {
+                    clearInterval(moveDown);
+                    coin.parentNode.removeChild(coin);
+                }
+            }, 20);
+        }
+        
+        window.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            if (e.key === 'ArrowLeft') {
+                playerPosition = Math.max(0, playerPosition - 5);
+                updatePlayerPosition();
+            } else if (e.key === 'ArrowRight') {
+                playerPosition = Math.min(95, playerPosition + 5);
+                updatePlayerPosition();
+            }
+        });
+        
+        startButton.addEventListener('click', () => {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            gameScore = 0;
+            scoreElement.textContent = gameScore;
+            
+            // Reset player position
+            playerPosition = 50;
+            updatePlayerPosition();
+            
+            // Start obstacle generation
+            const obstacleInterval = setInterval(() => {
+                if (!gameRunning) {
+                    clearInterval(obstacleInterval);
+                    return;
+                }
+                createObstacle();
+            }, 1500);
+            
+            // Start coin generation
+            const coinInterval = setInterval(() => {
+                if (!gameRunning) {
+                    clearInterval(coinInterval);
+                    return;
+                }
+                createCoin();
+            }, 2000);
+        });
+        
+        // Buy button popup
+        document.getElementById('buy-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('To buy $SoDead tokens, please connect your wallet to Uniswap and use contract address: 0xDEAD42069...FEAD420');
+        });
+    </script>
+</body>
+</html>
