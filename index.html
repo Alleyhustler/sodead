@@ -251,7 +251,7 @@
             <a href="https://t.me/SoDeadCoin" target="_blank" class="top-button">
                 <i></i> Telegram
             </a>
-            <a href="https://pump.fun/profile/6dXCwf5UhjSXNR22GiLxxAoWu5MyYVSfdJ54K5zPoSqg" class="top-button" id="buy-button">
+            <a href="https://pump.fun/profile/6dXCwf5UhjSXNR22GiLxxAoWu5MyYVSfdJ54K5zPoSqg" target="_blank" class="top-button" id="buy-button">
                 <i></i> Buy $SoDead
             </a>
         </div>
@@ -700,11 +700,8 @@
             }, 2000);
         });
         
-        // Buy button popup
-        document.getElementById('buy-button').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('To buy $SoDead tokens, please connect your wallet to Uniswap and use contract address: 0xDEAD42069...FEAD420');
-        });
+        // Remove the alert popup for the buy button
+        // The buy button now directly links to pump.fun without a popup
     </script>
 </body>
 </html>
